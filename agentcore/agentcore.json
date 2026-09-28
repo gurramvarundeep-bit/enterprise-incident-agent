@@ -7,13 +7,78 @@
     "agentcore:created-by": "agentcore-cli",
     "agentcore:project-name": "EnterpriseIncidentAgent"
   },
-  "runtimes": [],
-  "memories": [],
+  "runtimes": [
+    {
+      "name": "incidentagent",
+      "build": "CodeZip",
+      "entrypoint": "main.py",
+      "codeLocation": "app/incidentagent/",
+      "runtimeVersion": "PYTHON_3_14",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP",
+      "authorizerType": "CUSTOM_JWT",
+      "authorizerConfiguration": {
+        "customJwtAuthorizer": {
+          "discoveryUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_QKD4W40Qb/.well-known/openid-configuration",
+          "allowedClients": [
+            "4eehur4ggbendoqifo5t2p7lg7"
+          ]
+        }
+      }
+    }
+  ],
+  "memories": [
+    {
+      "name": "IncidentMemory",
+      "eventExpiryDuration": 30,
+      "strategies": [
+        {
+          "type": "SEMANTIC",
+          "namespaceTemplates": [
+            "/users/{actorId}/facts"
+          ]
+        },
+        {
+          "type": "SUMMARIZATION",
+          "namespaceTemplates": [
+            "/summaries/{actorId}/{sessionId}"
+          ]
+        }
+      ]
+    }
+  ],
   "knowledgeBases": [],
   "credentials": [],
   "evaluators": [],
   "onlineEvalConfigs": [],
-  "agentCoreGateways": [],
+  "agentCoreGateways": [
+    {
+      "name": "IncidentToolsGateway",
+      "protocolType": "MCP",
+      "description": "MCP gateway for enterprise incident management tools",
+      "targets": [
+        {
+          "name": "ServiceHealthTarget",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "arn:aws:lambda:us-east-1:084140147947:function:EnterpriseIncidentServiceHealth",
+            "toolSchemaFile": "C:\\Users\\varun\\enterprise-incident-agent\\EnterpriseIncidentAgent\\gateway-tools\\service-health\\tools.json"
+          }
+        }
+      ],
+      "authorizerType": "CUSTOM_JWT",
+      "authorizerConfiguration": {
+        "customJwtAuthorizer": {
+          "discoveryUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_QKD4W40Qb/.well-known/openid-configuration",
+          "allowedClients": [
+            "4eehur4ggbendoqifo5t2p7lg7"
+          ]
+        }
+      },
+      "enableSemanticSearch": true,
+      "exceptionLevel": "NONE"
+    }
+  ],
   "policyEngines": [],
   "configBundles": [],
   "abTests": [],

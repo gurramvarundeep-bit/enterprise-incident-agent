@@ -79,7 +79,11 @@ export default function ExecutionContextPanel({ user, isAuthenticated, apiStatus
 
       <div className="ctx-row ctx-row--mono">
         <span className="ctx-row__label">Conversation ID</span>
-        <code title={sessionId}>{sessionId.slice(0, 8)}…</code>
+        {sessionId ? (
+          <code title={sessionId}>{sessionId.slice(0, 8)}…</code>
+        ) : (
+          <span className="text-muted">Not started</span>
+        )}
       </div>
     </aside>
   );

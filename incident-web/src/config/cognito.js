@@ -8,7 +8,7 @@ const origin = typeof window !== "undefined" ? window.location.origin : "";
 export const cognitoConfig = {
   region: env.VITE_COGNITO_REGION || "us-east-1",
   userPoolId: env.VITE_COGNITO_USER_POOL_ID || "us-east-1_QKD4W40Qb",
-  clientId: env.VITE_COGNITO_CLIENT_ID || "475qi4675rg4kl7ask2m52ai1a",
+  clientId: env.VITE_COGNITO_CLIENT_ID || "475q14675rg4k17ask2m52aiia",
   domain:
     env.VITE_COGNITO_DOMAIN ||
     "us-east-1qkd4w40qb.auth.us-east-1.amazoncognito.com",

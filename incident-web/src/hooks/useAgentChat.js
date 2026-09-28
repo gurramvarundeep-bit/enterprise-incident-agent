@@ -3,8 +3,8 @@ import { isAgentApiConfigured } from "../config/agent.js";
 import {
   AgentApiError,
   NOT_CONFIGURED_MESSAGE,
-  getOrCreateSessionId,
-  resetSessionId,
+  clearSessionId,
+  getStoredSessionId,
   sendPrompt,
 } from "../services/agentApi.js";
 import { createId } from "../utils/format.js";
@@ -35,7 +35,7 @@ export function useAgentChat({ getAccessToken, onUnauthorized }) {
   const [isSending, setIsSending] = useState(false);
   const [apiStatus, setApiStatus] = useState(initialApiStatus);
   const [lastError, setLastError] = useState(null);
-  const [sessionId, setSessionId] = useState(getOrCreateSessionId);
+  const [sessionId, setSessionId] = useState(getStoredSessionId);
   const abortRef = useRef(null);
 
   const append = useCallback((message) => {
@@ -51,7 +51,6 @@ export function useAgentChat({ getAccessToken, onUnauthorized }) {
       append({ role: "user", text });
 
       if (!isAgentApiConfigured()) {
-        // Explicit development state; never impersonate a real backend reply.
         append({ role: "system", variant: "not_configured", text: NOT_CONFIGURED_MESSAGE });
         return;
       }
@@ -64,14 +63,20 @@ export function useAgentChat({ getAccessToken, onUnauthorized }) {
         const accessToken = await getAccessToken();
         if (!accessToken) {
           onUnauthorized?.();
+          append({
+            role: "system",
+            variant: "error",
+            text: "Your session has expired. Please sign in again.",
+          });
           return;
         }
         const result = await sendPrompt({
           prompt: text,
           accessToken,
-          sessionId,
+          sessionId: sessionId || undefined,
           signal: abortRef.current.signal,
         });
+        if (result.sessionId) setSessionId(result.sessionId);
         setApiStatus("ok");
         append({
           role: "agent",
@@ -100,11 +105,12 @@ export function useAgentChat({ getAccessToken, onUnauthorized }) {
 
   const clear = useCallback(() => {
     abortRef.current?.abort();
+    clearSessionId();
+    setSessionId(null);
     setMessages([welcomeMessage()]);
     setLastError(null);
     setIsSending(false);
     setApiStatus(initialApiStatus());
-    setSessionId(resetSessionId());
   }, []);
 
   const liveApprovals = useMemo(
